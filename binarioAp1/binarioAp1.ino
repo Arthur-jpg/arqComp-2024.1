@@ -1,9 +1,9 @@
 // Defina as portas onde as chaves estão conectadas
-const int chave1Pin = 2;
-const int chave2Pin = 3;
-const int chave3Pin = 4;
-const int chave4Pin = 5;
-const int chave5Pin = 6;
+const int chave1Pin = 51;
+const int chave2Pin = 49;
+const int chave3Pin = 47;
+const int chave4Pin = 45;
+const int chave5Pin = 43;
 
 void setup() {
   // Configure as portas das chaves como entrada
@@ -30,11 +30,12 @@ void loop() {
   int numero = binario.toInt();
 
   // Imprime o número binário e decimal na porta serial
-  Serial.print("Binário: ");
-  Serial.print(binario);
-  Serial.print(", Decimal: ");
-  Serial.println(numero);
+  // Serial.print("Binário: ");
+  // Serial.print(binario);
+  // Serial.print(", Decimal: ");
+  // Serial.println(numero);
 
-  // Aguarde um curto período de tempo antes de ler novamente
+  Serial.print(binario);
+
   
 }

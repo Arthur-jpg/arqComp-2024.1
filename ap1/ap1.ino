@@ -21,22 +21,39 @@
 #define S4 13
 
 
+
+
 int VAL1 = 0;
-int 
 
 
+int converteDecimal(int A0, int A1, int A2, int A3, int A4){
+ int decimal = 0;
+ decimal = A0 + A1 * 2 + A2 * 4 + A3 * 8 + A4 * 16;
+ return(decimal);
+}
 
 
 void setup() {
   pinMode(CH1,INPUT);
   pinMode(VED,OUTPUT);
   pinMode(VEM,OUTPUT);
+  Serial.begin(9600); 
 
 
 }
 
 void loop() { 
+  int a,b,c,d,e, saida;
+  a = digitalRead(I4);
+  b = digitalRead(I3);
+  c = digitalRead(I2);
+  d = digitalRead(I1);
+  e = digitalRead(I0);
+  saida = converteDecimal(a,b,c,d,e);
+  Serial.println(saida,DEC);
+  delay(6000);
   VAL1 = digitalRead(CH1);
+
 
   if (VAL1 == 0) {
     digitalWrite(VED, HIGH);
