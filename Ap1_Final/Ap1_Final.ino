@@ -4,11 +4,11 @@
 #define VED 3
 #define VEM 4
 
-#define I0 42
-#define I1 44
-#define I2 46
-#define I3 48
-#define I4 50
+#define I0 52
+#define I1 50
+#define I2 48
+#define I3 46
+#define I4 44
 
 #define T0 41
 #define T1 39
@@ -129,16 +129,56 @@ int binarioParaDecimal() {
   j = digitalRead(T0);
 
   entrada = converteDecimal(a, b, c, d, e);
+  // Serial.println(entrada);
   saida = converteDecimal(f, g, h, i, j);
+  // Serial.println(saida);
   calculo = saida - hora;
   // Serial.println(calculo);
   return calculo;
 }
 
+void ledsLow() {
+  digitalWrite(LED1, LOW);
+  digitalWrite(LED2, LOW);
+  digitalWrite(LED3, LOW);
+  digitalWrite(LED4, LOW);
+  digitalWrite(LED5, LOW);
+}
+
+void detectarMovimento() {
+  if (VAL2 == 1) {
+    digitalWrite(LED6, HIGH);
+    tone(B1,2500,50000); 
+    delay(10);
+  } else if (VAL2 == 0){
+    noTone(B1);
+    digitalWrite(LED6,LOW);
+  }
+}
+
+void naoDedectarMovimento() {
+    if (VAL2 == 1) {
+    noTone(B1);
+    digitalWrite(LED6,LOW);
+  } else if (VAL2 == 0){
+    noTone(B1);
+    digitalWrite(LED6,LOW);
+  }
+}
+
 void loop() {
   // Se houver dados disponíveis no monitor serial
-
-
+  VAL1 = digitalRead(CH1); 
+  if (VAL1 == 1) {
+    digitalWrite(VEM, LOW);
+    digitalWrite(VED, HIGH);
+  } else if (VAL1 == 0) {
+    digitalWrite(VEM, HIGH);
+    digitalWrite(VED, LOW);
+  } else {
+    digitalWrite(VEM, LOW);
+    digitalWrite(VED, LOW);
+  }
 
   if (Serial.available() > 0) {
     // Lê os dados inseridos pelo usuário
@@ -150,7 +190,6 @@ void loop() {
 
       Serial.read();
     }
-    
 
     // Verifica se os valores inseridos são válidos
     if (hora >= 0 && hora <= 23 && minuto >= 0 && minuto <= 59 && segundo >= 0 && segundo <= 59) {
@@ -168,15 +207,13 @@ void loop() {
         VAL1 = digitalRead(CH1); 
         VAL2 = digitalRead(CHT);
         calculo = binarioParaDecimal();
+
         int complement = ~calculo + 1; // Calcula o complemento de 1 do tempo restante
         activate_countdown_leds(complement);
+
         if (hora > saida || hora < entrada || calculo < 1 ){
           Serial.print("Horário alarme desativado!");
-          digitalWrite(LED1, LOW);
-          digitalWrite(LED2, LOW);
-          digitalWrite(LED3, LOW);
-          digitalWrite(LED4, LOW);
-          digitalWrite(LED5, LOW);
+          ledsLow();
           if (VAL1 == 1) {
             digitalWrite(VEM, LOW);
             digitalWrite(VED, HIGH);
@@ -189,24 +226,14 @@ void loop() {
           if (VAL1 == 1) {
             digitalWrite(VEM, LOW);
             digitalWrite(VED, HIGH);
-            if (VAL2 == 1) {
-              digitalWrite(LED6, HIGH);
-              tone(B1,2500,50000); 
-              delay(10);
-            } else if (VAL2 == 0){
-              noTone(B1);
-              digitalWrite(LED6,LOW);
-            }
+            detectarMovimento();
           } else if (VAL1 == 0) {
             digitalWrite(VEM, HIGH);
             digitalWrite(VED, LOW);
+            ledsLow();
+            naoDedectarMovimento();
           }
         }
-
-
-
-
-        // Verifica se é hora do alarme
         
       }
     } else {
