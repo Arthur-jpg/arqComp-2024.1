@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+
 #define CH1 2
 #define VED 3
 #define VEM 4
@@ -33,6 +34,8 @@
 
 #define B1 5
 
+//definições de variáveis globais
+
 int hora = 0;
 int minuto = 0;
 int segundo = 0;
@@ -42,7 +45,7 @@ int calculo = 0;
 int VAL1 = 0;
 int VAL2 = 0;
 
-
+// setup das chaves e dos leds como output e input
 void setup() {
   pinMode(CH1,INPUT);
   pinMode(VED,OUTPUT);
@@ -58,10 +61,8 @@ void setup() {
 
   Serial.begin(9600); 
   
+  // Printar no serial monitor no início da aplicação
   Serial.println("Entre a hora atual: ");
-
-
-
 }
 
 // função para converter binario em decimal
@@ -100,8 +101,9 @@ void printHora() {
   Serial.println(segundo);
 }
 
+// função para fazer o complemento de 1
 void activate_countdown_leds(int complemento) {
-    // Converter complemento para valor positivo
+    // Para garantir que o complemento vai ser positivo
     if (complemento < 0) {
         complemento = -complemento;
     }
@@ -144,6 +146,13 @@ void ledsLow() {
   digitalWrite(LED4, LOW);
   digitalWrite(LED5, LOW);
 }
+void ledsHigh() {
+  digitalWrite(LED1, HIGH);
+  digitalWrite(LED2, HIGH);
+  digitalWrite(LED3, HIGH);
+  digitalWrite(LED4, HIGH);
+  digitalWrite(LED5, HIGH);
+}
 
 void detectarMovimento() {
   if (VAL2 == 1) {
@@ -151,6 +160,9 @@ void detectarMovimento() {
     tone(B1,2500,50000); 
     delay(10);
   } else if (VAL2 == 0){
+    noTone(B1);
+    digitalWrite(LED6,LOW);
+  } else {
     noTone(B1);
     digitalWrite(LED6,LOW);
   }
@@ -166,6 +178,16 @@ void naoDedectarMovimento() {
   }
 }
 
+void ifGeral() {
+    if (VAL1 == 1) {
+    digitalWrite(VEM, LOW);
+    digitalWrite(VED, HIGH);
+  }  else if (VAL1 == 0) {
+    digitalWrite(VEM, HIGH);
+    digitalWrite(VED, LOW);
+  }
+}
+
 void loop() {
   // Se houver dados disponíveis no monitor serial
   VAL1 = digitalRead(CH1); 
@@ -174,9 +196,6 @@ void loop() {
     digitalWrite(VED, HIGH);
   } else if (VAL1 == 0) {
     digitalWrite(VEM, HIGH);
-    digitalWrite(VED, LOW);
-  } else {
-    digitalWrite(VEM, LOW);
     digitalWrite(VED, LOW);
   }
 
@@ -214,13 +233,7 @@ void loop() {
         if (hora > saida || hora < entrada || calculo < 1 ){
           Serial.print("Horário alarme desativado!");
           ledsLow();
-          if (VAL1 == 1) {
-            digitalWrite(VEM, LOW);
-            digitalWrite(VED, HIGH);
-          }  else if (VAL1 == 0) {
-            digitalWrite(VEM, HIGH);
-            digitalWrite(VED, LOW);
-          }
+          ifGeral();
           break;
         } else {
           if (VAL1 == 1) {
@@ -232,6 +245,8 @@ void loop() {
             digitalWrite(VED, LOW);
             ledsLow();
             naoDedectarMovimento();
+            Serial.println("alarme desativado");
+            break;
           }
         }
         
@@ -242,21 +257,13 @@ void loop() {
       for (int i = 0; i < 5; i++) {
           // Ligar todos os LEDs
         for (int led = 1; led <= 5; led++) {
-          digitalWrite(LED1, HIGH);
-          digitalWrite(LED2, HIGH);
-          digitalWrite(LED3, HIGH);
-          digitalWrite(LED4, HIGH);
-          digitalWrite(LED5, HIGH);
+          ledsHigh();
         }
         // Aguardar um curto período de tempo
         delay(500); 
         // Desligar todos os LEDs
         for (int led = 1; led <= 5; led++) {
-          digitalWrite(LED1, LOW);
-          digitalWrite(LED2, LOW);
-          digitalWrite(LED3, LOW);
-          digitalWrite(LED4, LOW);
-          digitalWrite(LED5, LOW);
+          ledsLow();
         }
         // Aguardar um curto período de tempo
         delay(500); // Por exemplo, meio segundo
