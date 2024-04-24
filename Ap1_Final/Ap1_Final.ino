@@ -108,6 +108,7 @@ void activate_countdown_leds(int complemento) {
         complemento = -complemento;
     }
 
+
     // Exibir o complemento de 1 nos LEDs
     digitalWrite(LED1, complemento & 0x01);
     digitalWrite(LED2, complemento & 0x02);
@@ -131,11 +132,15 @@ int binarioParaDecimal() {
   j = digitalRead(T0);
 
   entrada = converteDecimal(a, b, c, d, e);
-  // Serial.println(entrada);
+  Serial.print("Hora entrada: ");
+  Serial.println(entrada);
   saida = converteDecimal(f, g, h, i, j);
-  // Serial.println(saida);
+  Serial.print("Hora entrada: ");
+  Serial.println(saida);
   calculo = saida - hora;
-  // Serial.println(calculo);
+  Serial.print("Calculo: ");
+  Serial.println(calculo);
+  Serial.println("----------------------------------");
   return calculo;
 }
 
@@ -226,9 +231,12 @@ void loop() {
         VAL1 = digitalRead(CH1); 
         VAL2 = digitalRead(CHT);
         calculo = binarioParaDecimal();
+        // Serial.println(calculo);
 
-        int complement = ~calculo + 1; // Calcula o complemento de 1 do tempo restante
-        activate_countdown_leds(complement);
+        int complemento = ~calculo + 1;// Calcula o complemento de 1 do tempo restante
+      
+
+        activate_countdown_leds(complemento);
 
         if (hora > saida || hora < entrada || calculo < 1 ){
           Serial.print("Horário alarme desativado!");
