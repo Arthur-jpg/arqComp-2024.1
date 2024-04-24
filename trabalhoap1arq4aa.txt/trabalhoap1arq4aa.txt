@@ -259,7 +259,8 @@ void loop() {
             digitalWrite(VED, LOW);
             ledsLow();
             naoDedectarMovimento();
-
+            Serial.println("alarme desativado");
+            break;
           }
         }
         
