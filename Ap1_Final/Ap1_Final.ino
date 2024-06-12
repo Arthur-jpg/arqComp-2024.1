@@ -39,6 +39,7 @@
 #define CHT 10
 
 #define B1 5
+#define Sensor 12
 
 //definições de variáveis globais
 
@@ -50,6 +51,7 @@ int saida = 0;
 int calculo = 0;
 int VAL1 = 0;
 int VAL2 = 0;
+bool ValorSensor = 0;
 
 // setup das chaves e dos leds como output e input
 void setup() {
@@ -64,6 +66,7 @@ void setup() {
   pinMode(LED3, OUTPUT);
   pinMode(LED4, OUTPUT);
   pinMode(LED5, OUTPUT);
+  pinMode (Sensor, INPUT);
 
   Serial.begin(9600); 
   
@@ -166,11 +169,13 @@ void ledsHigh() {
 }
 
 void detectarMovimento() {
-  if (VAL2 == 1) {
+  ValorSensor = digitalRead(Sensor);
+  
+  if (ValorSensor == true) {
     digitalWrite(LED6, HIGH);
     tone(B1,2500,50000); 
     delay(10);
-  } else if (VAL2 == 0){
+  } else if (ValorSensor == false){
     noTone(B1);
     digitalWrite(LED6,LOW);
   } else {
@@ -202,6 +207,8 @@ void ifGeral() {
 void loop() {
   // Se houver dados disponíveis no monitor serial
   VAL1 = digitalRead(CH1); 
+  bool ValorSensor = digitalRead(Sensor);
+
   if (VAL1 == 1) {
     digitalWrite(VEM, LOW);
     digitalWrite(VED, HIGH);
