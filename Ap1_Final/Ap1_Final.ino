@@ -185,10 +185,11 @@ void detectarMovimento() {
 }
 
 void naoDedectarMovimento() {
-    if (VAL2 == 1) {
+  ValorSensor = digitalRead(Sensor);
+  if (ValorSensor == true) {
     noTone(B1);
     digitalWrite(LED6,LOW);
-  } else if (VAL2 == 0){
+  } else if (ValorSensor == false){
     noTone(B1);
     digitalWrite(LED6,LOW);
   }
@@ -207,7 +208,6 @@ void ifGeral() {
 void loop() {
   // Se houver dados disponíveis no monitor serial
   VAL1 = digitalRead(CH1); 
-  bool ValorSensor = digitalRead(Sensor);
 
   if (VAL1 == 1) {
     digitalWrite(VEM, LOW);
