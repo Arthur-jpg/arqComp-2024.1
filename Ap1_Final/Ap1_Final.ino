@@ -173,7 +173,7 @@ void detectarMovimento() {
   
   if (ValorSensor == true) {
     digitalWrite(LED6, HIGH);
-    tone(B1,2500,50000); 
+    tone(B1,100,1000); 
     delay(10);
   } else if (ValorSensor == false){
     noTone(B1);

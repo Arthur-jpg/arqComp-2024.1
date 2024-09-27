@@ -1,0 +1,246 @@
+#include <Ultrasonic.h>
+
+// Definições dos pinos e variáveis de controle
+#define BIN1 46
+#define BIN2 48
+#define BIN3 50
+#define BIN4 52
+
+#define TRIGGER_PIN 10
+#define ECHO_PIN 11
+
+#define LEDA 5
+#define LEDB 6
+#define LEDC 7
+
+#define BUZZ 2
+
+#define trig 22
+#define echo 24
+
+#define sensorPresenca 8
+
+bool isProgramActive = false;
+int modoAtual = 0;
+
+double distancia = 0;
+bool medirDistancia = false; // Variável de controle para medir distância continuamente
+
+int VAL1 = 0;
+int VAL2 = 0;
+int VAL3 = 0;
+int VAL4 = 0;
+int valorSensor = 0;
+
+// Função para desligar todos os componentes
+void desligarTudo() {
+    digitalWrite(LEDA, LOW);
+    digitalWrite(LEDB, LOW);
+    digitalWrite(LEDC, LOW);
+    digitalWrite(BUZZ, LOW);
+    medirDistancia = false; // Desativa medição de distância quando o programa é encerrado
+    while (true) {
+        // Fica preso aqui para garantir que o programa pare
+    }
+}
+
+// Função para medir a distância usando sensor ultrassônico
+void distancias() {
+    digitalWrite(trig, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trig, LOW);
+    distancia = pulseIn(echo, HIGH);
+    distancia = distancia * 340;
+    distancia = distancia / 2;
+    distancia = distancia / 10000;
+    Serial.println(distancia);
+}
+
+void detectarMovimento() {
+  valorSensor = digitalRead(sensorPresenca);
+  if (valorSensor == true) {
+    Serial.println("TEM GENTE");
+  } else if (valorSensor == false) {
+    Serial.println("NÃO TEM GENTE");
+    
+  } else {
+    Serial.println("NÃO TEM GENTE");
+
+  }
+}
+
+// Função para processar comandos recebidos via monitor serial
+void serialTeste() {
+    if (Serial.available() > 0) {
+        String comando = Serial.readStringUntil('\n'); // Lê a linha de comando até nova linha
+        comando.trim(); // Remove espaços em branco extras
+
+        // Comando para finalizar o programa
+        if (comando == "FIM_PROG") {
+            Serial.println("Programação desativada via comando serial.");
+            desligarTudo(); // Desliga tudo e encerra a programação
+            modoAtual = 0;
+        }
+        // Comando para acender LED A
+        else if (comando == "LED_ONA") {
+            Serial.println("Executando Comando 1 via serial.");
+            digitalWrite(LEDA, HIGH);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+            medirDistancia = false; // Desativa medição de distância caso esteja ativa
+        }
+        // Comando para desligar LED A
+        else if (comando == "LED_OFFA") {
+            Serial.println("Executando Comando 2 via serial.");
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+            medirDistancia = false; // Desativa medição de distância caso esteja ativa
+        }
+        // Comando para acender LED B
+        else if (comando == "LED_ONB") {
+            Serial.println("Executando Comando 3 via serial.");
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, HIGH);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+            medirDistancia = false; // Desativa medição de distância caso esteja ativa
+        }
+        // Comando para iniciar a medição de distância continuamente
+        else if (comando == "DIST_CHECKA") {
+            Serial.println("Executando Comando 4 via serial. Medição de distância ativada.");
+            medirDistancia = true; // Ativa a medição de distância contínua
+        }
+        else if (comando == "PRES_READA") {
+            detectarMovimento();
+        }
+    }
+}
+
+// Função para processar comandos recebidos via binário
+void binarioTeste() {
+    // Verifica se a combinação é 1101 para encerrar a programação
+    if (VAL1 == 1 && VAL2 == 0 && VAL3 == 1 && VAL4 == 1) {
+        Serial.println("Programação encerrada");
+        isProgramActive = false;
+        desligarTudo();
+        modoAtual = 0;
+    }
+
+    if (isProgramActive) {
+        if((VAL1 == 0) && (VAL2 == 0) && (VAL3 == 0) && (VAL4 == 0)) {
+            digitalWrite(LEDA, HIGH);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+        }
+        else if ((VAL1 == 1) && (VAL2 == 0) && (VAL3 == 0) && (VAL4 == 0)) {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+        } 
+        else if ((VAL1 == 0) && (VAL2 == 1) && (VAL3 == 0) && (VAL4 == 0)) {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, HIGH);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+        }
+        else if ((VAL1 == 1) && (VAL2 == 1) && (VAL3 == 0) && (VAL4 == 0)) {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+        } 
+        else if ((VAL1 == 0) && (VAL2 == 0) && (VAL3 == 1) && (VAL4 == 0)) {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+        }
+        else if ((VAL1 == 1) && (VAL2 == 0) && (VAL3 == 1) && (VAL4 == 0)) {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+        }
+        else if ((VAL1 == 1) && (VAL2 == 1) && (VAL3 == 1) && (VAL4 == 0)) {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+            distancias(); // Executa medição de distância
+        }
+        else if ((VAL1 == 0) && (VAL2 == 0) && (VAL3 == 0) && (VAL4 == 1)) {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+            detectarMovimento();
+        }
+
+    }
+}
+
+// Configuração inicial do Arduino
+void setup() {
+    pinMode(BIN1, INPUT);
+    pinMode(BIN2, INPUT);
+    pinMode(BIN3, INPUT);
+    pinMode(BIN4, INPUT);
+    pinMode(LEDA, OUTPUT);
+    pinMode(BUZZ, OUTPUT);
+    pinMode(trig, OUTPUT);
+    pinMode(echo, INPUT);
+    pinMode(sensorPresenca, INPUT);
+    
+  
+    Serial.begin(9600);
+    Serial.println("Digite os comandos no formato: 'comando'");
+    Serial.println("Comandos disponíveis:");
+    Serial.println(" - ativar: INICIO_PROG");
+    Serial.println(" - desativar: FIM_PROG");
+}
+
+// Loop principal do programa
+void loop() {
+    // Lê os valores das entradas binárias
+    VAL1 = digitalRead(BIN1);
+    VAL2 = digitalRead(BIN2);
+    VAL3 = digitalRead(BIN3);
+    VAL4 = digitalRead(BIN4);
+
+    delay(500);
+
+    // Verifica se o programa está no estado inicial e aguarda comandos para ativar
+    if (modoAtual == 0) {
+        if (Serial.available() > 0) {
+            String comando = Serial.readStringUntil('\n');
+            comando.trim();
+            if (comando == "INICIO_PROG") {
+                Serial.println("Programação ativada via comando serial.");
+                modoAtual = 1;
+            }
+        }
+        if (VAL1 == 0 && VAL2 == 0 && VAL3 == 1 && VAL4 == 1) {
+            Serial.println("Programação ativada");
+            isProgramActive = true;
+            modoAtual = 2;
+        }
+    }
+  
+    // Verifica o modo atual e executa a função correspondente
+    if (modoAtual == 1) {
+        serialTeste(); // Checa comandos e executa continuamente
+    }
+    else if (modoAtual == 2) {
+        binarioTeste(); // Checa e executa com base nos valores binários
+    }
+
+    // Executa medição de distância continuamente se ativado
+    if (medirDistancia) {
+        distancias();
+    }
+}
