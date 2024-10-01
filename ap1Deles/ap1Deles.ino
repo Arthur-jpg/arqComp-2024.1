@@ -149,6 +149,14 @@ void serialTeste() {
             detectarMov = false;  // Ativa detecção de movimento contínua
             medirDistancia = false;  // Desativa medição de distância contínua
 
+        } else if (comando == "BUZZ_OFF") {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+            detectarMov = false;  // Ativa detecção de movimento contínua
+            medirDistancia = false;  // Desativa medição de distância contínua
+
         }
     }
 }
