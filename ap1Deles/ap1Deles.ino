@@ -23,8 +23,12 @@
 bool isProgramActive = false;
 int modoAtual = 0;
 
+bool medirDistancia = false;  // Variável para controlar a execução contínua da medição de distância
+bool detectarMov = false;     // Variável para controlar a execução contínua do sensor de movimento
+
+
 double distancia = 0;
-bool medirDistancia = false; // Variável de controle para medir distância continuamente
+
 
 int VAL1 = 0;
 int VAL2 = 0;
@@ -75,49 +79,80 @@ void serialTeste() {
         String comando = Serial.readStringUntil('\n'); // Lê a linha de comando até nova linha
         comando.trim(); // Remove espaços em branco extras
 
-        // Comando para finalizar o programa
         if (comando == "FIM_PROG") {
             Serial.println("Programação desativada via comando serial.");
-            desligarTudo(); // Desliga tudo e encerra a programação
+            desligarTudo();
             modoAtual = 0;
-        }
-        // Comando para acender LED A
-        else if (comando == "LED_ONA") {
-            Serial.println("Executando Comando 1 via serial.");
+            medirDistancia = false;
+            detectarMov = false;
+        } else if (comando == "DIST_CHECKA") {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+            medirDistancia = true;
+            detectarMov = false;  // Ativa medição de distância contínua
+        } else if (comando == "PRES_READA") {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+            detectarMov = true;  // Ativa detecção de movimento contínua
+            medirDistancia = false;  // Desativa medição de distância contínua
+        } else if (comando == "LED_ONA") {
             digitalWrite(LEDA, HIGH);
             digitalWrite(LEDB, LOW);
             digitalWrite(LEDC, LOW);
             digitalWrite(BUZZ, LOW);
-            medirDistancia = false; // Desativa medição de distância caso esteja ativa
-        }
-        // Comando para desligar LED A
-        else if (comando == "LED_OFFA") {
-            Serial.println("Executando Comando 2 via serial.");
+            detectarMov = false;  // Ativa detecção de movimento contínua
+            medirDistancia = false;  // Desativa medição de distância contínua
+        } else if (comando == "LED_OFFA") {
             digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, LOW);
             digitalWrite(LEDC, LOW);
             digitalWrite(BUZZ, LOW);
-            medirDistancia = false; // Desativa medição de distância caso esteja ativa
-        }
-        // Comando para acender LED B
-        else if (comando == "LED_ONB") {
-            Serial.println("Executando Comando 3 via serial.");
+            detectarMov = false;  // Ativa detecção de movimento contínua
+            medirDistancia = false;  // Desativa medição de distância contínua
+        } else if (comando == "LED_ONB") {
             digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, HIGH);
             digitalWrite(LEDC, LOW);
             digitalWrite(BUZZ, LOW);
-            medirDistancia = false; // Desativa medição de distância caso esteja ativa
-        }
-        // Comando para iniciar a medição de distância continuamente
-        else if (comando == "DIST_CHECKA") {
-            Serial.println("Executando Comando 4 via serial. Medição de distância ativada.");
-            medirDistancia = true; // Ativa a medição de distância contínua
-        }
-        else if (comando == "PRES_READA") {
-            detectarMovimento();
+            detectarMov = false;  // Ativa detecção de movimento contínua
+            medirDistancia = false;  // Desativa medição de distância contínua
+        } else if (comando == "LED_OFFB") {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+            detectarMov = false;  // Ativa detecção de movimento contínua
+            medirDistancia = false;  // Desativa medição de distância contínua
+        } else if (comando == "LED_ONC") {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, HIGH);
+            digitalWrite(BUZZ, LOW);
+            detectarMov = false;  // Ativa detecção de movimento contínua
+            medirDistancia = false;  // Desativa medição de distância contínua
+        } else if (comando == "LED_OFFC") {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+            detectarMov = false;  // Ativa detecção de movimento contínua
+            medirDistancia = false;  // Desativa medição de distância contínua
+        } else if (comando == "BUZZ_ON") {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, HIGH);
+            detectarMov = false;  // Ativa detecção de movimento contínua
+            medirDistancia = false;  // Desativa medição de distância contínua
+
         }
     }
 }
+
 
 // Função para processar comandos recebidos via binário
 void binarioTeste() {
@@ -204,7 +239,6 @@ void setup() {
     Serial.println(" - desativar: FIM_PROG");
 }
 
-// Loop principal do programa
 void loop() {
     // Lê os valores das entradas binárias
     VAL1 = digitalRead(BIN1);
@@ -230,17 +264,23 @@ void loop() {
             modoAtual = 2;
         }
     }
-  
+
     // Verifica o modo atual e executa a função correspondente
     if (modoAtual == 1) {
         serialTeste(); // Checa comandos e executa continuamente
-    }
-    else if (modoAtual == 2) {
+    } else if (modoAtual == 2) {
         binarioTeste(); // Checa e executa com base nos valores binários
     }
 
     // Executa medição de distância continuamente se ativado
     if (medirDistancia) {
         distancias();
+
+    }
+
+    // Executa detecção de movimento continuamente se ativado
+    if (detectarMov) {
+        detectarMovimento();
     }
 }
+
