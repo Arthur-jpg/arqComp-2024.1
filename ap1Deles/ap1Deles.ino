@@ -1,4 +1,6 @@
 #include <Ultrasonic.h>
+#include <dht11.h>
+
 
 // Definições dos pinos e variáveis de controle
 #define BIN1 46
@@ -6,7 +8,7 @@
 #define BIN3 50
 #define BIN4 52
 
-#define TRIGGER_PIN 10
+#define TEMP 10
 #define ECHO_PIN 11
 
 #define LEDA 5
@@ -25,7 +27,9 @@ int modoAtual = 0;
 
 bool medirDistancia = false;  // Variável para controlar a execução contínua da medição de distância
 bool detectarMov = false;     // Variável para controlar a execução contínua do sensor de movimento
+bool detecTemp = false;
 
+dht11 DHT11;
 
 double distancia = 0;
 
@@ -73,6 +77,12 @@ void detectarMovimento() {
   }
 }
 
+void temperatura() {
+  DHT11.read(TEMP);
+  Serial.print("Temp: ");
+  Serial.print(DHT11.temperature);
+}
+
 // Função para processar comandos recebidos via monitor serial
 void serialTeste() {
     if (Serial.available() > 0) {
@@ -85,6 +95,7 @@ void serialTeste() {
             modoAtual = 0;
             medirDistancia = false;
             detectarMov = false;
+            detecTemp = false;
         } else if (comando == "DIST_CHECKA") {
             digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, LOW);
@@ -92,6 +103,7 @@ void serialTeste() {
             digitalWrite(BUZZ, LOW);
             medirDistancia = true;
             detectarMov = false;  // Ativa medição de distância contínua
+            detecTemp = false;
         } else if (comando == "PRES_READA") {
             digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, LOW);
@@ -99,6 +111,7 @@ void serialTeste() {
             digitalWrite(BUZZ, LOW);
             detectarMov = true;  // Ativa detecção de movimento contínua
             medirDistancia = false;  // Desativa medição de distância contínua
+            detecTemp = false;
         } else if (comando == "LED_ONA") {
             digitalWrite(LEDA, HIGH);
             digitalWrite(LEDB, LOW);
@@ -106,6 +119,7 @@ void serialTeste() {
             digitalWrite(BUZZ, LOW);
             detectarMov = false;  // Ativa detecção de movimento contínua
             medirDistancia = false;  // Desativa medição de distância contínua
+            detecTemp = false;
         } else if (comando == "LED_OFFA") {
             digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, LOW);
@@ -113,6 +127,7 @@ void serialTeste() {
             digitalWrite(BUZZ, LOW);
             detectarMov = false;  // Ativa detecção de movimento contínua
             medirDistancia = false;  // Desativa medição de distância contínua
+            detecTemp = false;
         } else if (comando == "LED_ONB") {
             digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, HIGH);
@@ -120,6 +135,7 @@ void serialTeste() {
             digitalWrite(BUZZ, LOW);
             detectarMov = false;  // Ativa detecção de movimento contínua
             medirDistancia = false;  // Desativa medição de distância contínua
+            detecTemp = false;
         } else if (comando == "LED_OFFB") {
             digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, LOW);
@@ -127,6 +143,7 @@ void serialTeste() {
             digitalWrite(BUZZ, LOW);
             detectarMov = false;  // Ativa detecção de movimento contínua
             medirDistancia = false;  // Desativa medição de distância contínua
+            detecTemp = false;
         } else if (comando == "LED_ONC") {
             digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, LOW);
@@ -134,6 +151,7 @@ void serialTeste() {
             digitalWrite(BUZZ, LOW);
             detectarMov = false;  // Ativa detecção de movimento contínua
             medirDistancia = false;  // Desativa medição de distância contínua
+            detecTemp = false;
         } else if (comando == "LED_OFFC") {
             digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, LOW);
@@ -141,6 +159,7 @@ void serialTeste() {
             digitalWrite(BUZZ, LOW);
             detectarMov = false;  // Ativa detecção de movimento contínua
             medirDistancia = false;  // Desativa medição de distância contínua
+            detecTemp = false;
         } else if (comando == "BUZZ_ON") {
             digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, LOW);
@@ -148,6 +167,7 @@ void serialTeste() {
             digitalWrite(BUZZ, HIGH);
             detectarMov = false;  // Ativa detecção de movimento contínua
             medirDistancia = false;  // Desativa medição de distância contínua
+            detecTemp = false;
 
         } else if (comando == "BUZZ_OFF") {
             digitalWrite(LEDA, LOW);
@@ -156,6 +176,17 @@ void serialTeste() {
             digitalWrite(BUZZ, LOW);
             detectarMov = false;  // Ativa detecção de movimento contínua
             medirDistancia = false;  // Desativa medição de distância contínua
+            detecTemp = false;
+
+        } else if (comando == "TEMP_READA") {
+            digitalWrite(LEDA, LOW);
+            digitalWrite(LEDB, LOW);
+            digitalWrite(LEDC, LOW);
+            digitalWrite(BUZZ, LOW);
+            detectarMov = false;  // Ativa detecção de movimento contínua
+            medirDistancia = false;  // Desativa medição de distância contínua
+            detecTemp = true;
+            
 
         }
     }
@@ -238,6 +269,7 @@ void setup() {
     pinMode(trig, OUTPUT);
     pinMode(echo, INPUT);
     pinMode(sensorPresenca, INPUT);
+
     
   
     Serial.begin(9600);
@@ -290,5 +322,7 @@ void loop() {
     if (detectarMov) {
         detectarMovimento();
     }
+    if (detecTemp) {
+      temperatura();
+    }
 }
-
