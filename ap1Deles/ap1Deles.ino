@@ -1,5 +1,15 @@
 #include <Ultrasonic.h>
 #include <dht11.h>
+#include "DHT.h"
+ 
+#define DHTPIN A3 // pino que estamos conectado
+#define DHTTYPE DHT11 // DHT 11
+ 
+int pinoR = 11;
+int pinoG = 10;
+
+#define pinoR 11
+#define pinoG 10
 
 
 // Definições dos pinos e variáveis de controle
@@ -19,8 +29,11 @@
 
 #define trig 22
 #define echo 24
+#define CHAVE 12
 
 #define sensorPresenca 8
+
+DHT dht(DHTPIN, DHTTYPE); 
 
 bool isProgramActive = false;
 int modoAtual = 0;
@@ -29,7 +42,6 @@ bool medirDistancia = false;  // Variável para controlar a execução contínua
 bool detectarMov = false;     // Variável para controlar a execução contínua do sensor de movimento
 bool detecTemp = false;
 
-dht11 DHT11;
 
 double distancia = 0;
 
@@ -38,6 +50,7 @@ int VAL1 = 0;
 int VAL2 = 0;
 int VAL3 = 0;
 int VAL4 = 0;
+int VAL5 = 0;
 int valorSensor = 0;
 
 // Função para desligar todos os componentes
@@ -46,7 +59,8 @@ void desligarTudo() {
     digitalWrite(LEDB, LOW);
     digitalWrite(LEDC, LOW);
     digitalWrite(BUZZ, LOW);
-    medirDistancia = false; // Desativa medição de distância quando o programa é encerrado
+    digitalWrite(pinoR, LOW);
+    digitalWrite(pinoG, LOW);
     while (true) {
         // Fica preso aqui para garantir que o programa pare
     }
@@ -78,9 +92,38 @@ void detectarMovimento() {
 }
 
 void temperatura() {
-  DHT11.read(TEMP);
-  Serial.print("Temp: ");
-  Serial.print(DHT11.temperature);
+  // A leitura da temperatura e umidade pode levar 250ms!
+  // O atraso do sensor pode chegar a 2 segundos.
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();
+  // testa se retorno é valido, caso contrário algo está errado.
+  if (isnan(t) || isnan(h)) 
+  {
+    Serial.println("Failed to read from DHT");
+  } 
+  else
+  {
+    Serial.print("Umidade: ");
+    Serial.print(h);
+    Serial.print(" %t");
+    Serial.print("Temperatura: ");
+    Serial.print(t);
+    Serial.println(" *C");
+    delay(1000);
+  }
+}
+
+
+void acenderLedVermelho() {
+  digitalWrite(pinoR, HIGH);
+  digitalWrite(pinoG, LOW);
+  Serial.println("LED Vermelho Aceso");
+}
+
+void acenderLedVerde() {
+  digitalWrite(pinoR, LOW);
+  digitalWrite(pinoG, HIGH);
+  Serial.println("LED Verde Aceso");
 }
 
 // Função para processar comandos recebidos via monitor serial
@@ -93,101 +136,32 @@ void serialTeste() {
             Serial.println("Programação desativada via comando serial.");
             desligarTudo();
             modoAtual = 0;
-            medirDistancia = false;
-            detectarMov = false;
-            detecTemp = false;
         } else if (comando == "DIST_CHECKA") {
-            digitalWrite(LEDA, LOW);
-            digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
-            medirDistancia = true;
-            detectarMov = false;  // Ativa medição de distância contínua
-            detecTemp = false;
+            distancias();
         } else if (comando == "PRES_READA") {
-            digitalWrite(LEDA, LOW);
-            digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
-            detectarMov = true;  // Ativa detecção de movimento contínua
-            medirDistancia = false;  // Desativa medição de distância contínua
-            detecTemp = false;
+            detectarMovimento();
         } else if (comando == "LED_ONA") {
             digitalWrite(LEDA, HIGH);
-            digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
-            detectarMov = false;  // Ativa detecção de movimento contínua
-            medirDistancia = false;  // Desativa medição de distância contínua
-            detecTemp = false;
         } else if (comando == "LED_OFFA") {
             digitalWrite(LEDA, LOW);
-            digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
-            detectarMov = false;  // Ativa detecção de movimento contínua
-            medirDistancia = false;  // Desativa medição de distância contínua
-            detecTemp = false;
         } else if (comando == "LED_ONB") {
-            digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, HIGH);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
-            detectarMov = false;  // Ativa detecção de movimento contínua
-            medirDistancia = false;  // Desativa medição de distância contínua
-            detecTemp = false;
         } else if (comando == "LED_OFFB") {
-            digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
-            detectarMov = false;  // Ativa detecção de movimento contínua
-            medirDistancia = false;  // Desativa medição de distância contínua
-            detecTemp = false;
         } else if (comando == "LED_ONC") {
-            digitalWrite(LEDA, LOW);
-            digitalWrite(LEDB, LOW);
             digitalWrite(LEDC, HIGH);
-            digitalWrite(BUZZ, LOW);
-            detectarMov = false;  // Ativa detecção de movimento contínua
-            medirDistancia = false;  // Desativa medição de distância contínua
-            detecTemp = false;
         } else if (comando == "LED_OFFC") {
-            digitalWrite(LEDA, LOW);
-            digitalWrite(LEDB, LOW);
             digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
-            detectarMov = false;  // Ativa detecção de movimento contínua
-            medirDistancia = false;  // Desativa medição de distância contínua
-            detecTemp = false;
         } else if (comando == "BUZZ_ON") {
-            digitalWrite(LEDA, LOW);
-            digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
             digitalWrite(BUZZ, HIGH);
-            detectarMov = false;  // Ativa detecção de movimento contínua
-            medirDistancia = false;  // Desativa medição de distância contínua
-            detecTemp = false;
-
         } else if (comando == "BUZZ_OFF") {
-            digitalWrite(LEDA, LOW);
-            digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
             digitalWrite(BUZZ, LOW);
-            detectarMov = false;  // Ativa detecção de movimento contínua
-            medirDistancia = false;  // Desativa medição de distância contínua
-            detecTemp = false;
-
         } else if (comando == "TEMP_READA") {
-            digitalWrite(LEDA, LOW);
-            digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
-            detectarMov = false;  // Ativa detecção de movimento contínua
-            medirDistancia = false;  // Desativa medição de distância contínua
-            detecTemp = true;
-            
-
+            temperatura();   
+        } else if (comando == "RGB_SET_COLORARED") {
+          acenderLedVermelho(); 
+        } else if (comando == "RGB_SET_COLORAGREEN"){
+          acenderLedVerde();
         }
     }
 }
@@ -206,53 +180,37 @@ void binarioTeste() {
     if (isProgramActive) {
         if((VAL1 == 0) && (VAL2 == 0) && (VAL3 == 0) && (VAL4 == 0)) {
             digitalWrite(LEDA, HIGH);
-            digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
         }
         else if ((VAL1 == 1) && (VAL2 == 0) && (VAL3 == 0) && (VAL4 == 0)) {
             digitalWrite(LEDA, LOW);
-            digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
         } 
         else if ((VAL1 == 0) && (VAL2 == 1) && (VAL3 == 0) && (VAL4 == 0)) {
-            digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, HIGH);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
         }
         else if ((VAL1 == 1) && (VAL2 == 1) && (VAL3 == 0) && (VAL4 == 0)) {
-            digitalWrite(LEDA, LOW);
             digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
         } 
         else if ((VAL1 == 0) && (VAL2 == 0) && (VAL3 == 1) && (VAL4 == 0)) {
-            digitalWrite(LEDA, LOW);
-            digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
+            digitalWrite(BUZZ, HIGH);
         }
         else if ((VAL1 == 1) && (VAL2 == 0) && (VAL3 == 1) && (VAL4 == 0)) {
-            digitalWrite(LEDA, LOW);
-            digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
             digitalWrite(BUZZ, LOW);
         }
         else if ((VAL1 == 1) && (VAL2 == 1) && (VAL3 == 1) && (VAL4 == 0)) {
-            digitalWrite(LEDA, LOW);
-            digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
             distancias(); // Executa medição de distância
         }
         else if ((VAL1 == 0) && (VAL2 == 0) && (VAL3 == 0) && (VAL4 == 1)) {
-            digitalWrite(LEDA, LOW);
-            digitalWrite(LEDB, LOW);
-            digitalWrite(LEDC, LOW);
-            digitalWrite(BUZZ, LOW);
             detectarMovimento();
+        } else if ((VAL1 == 0) && (VAL2 == 1) && (VAL3 == 1) && (VAL4 == 0)) {
+            temperatura();
+        } else if ((VAL1 == 1) && (VAL2 == 0) && (VAL3 == 0) && (VAL4 == 1)) {
+            acenderLedVermelho();
+        } else if ((VAL1 == 0) && (VAL2 == 1) && (VAL3 == 0) && (VAL4 == 1)) {
+            acenderLedVerde();
+        } else if ((VAL1 == 0) && (VAL2 == 1) && (VAL3 == 1) && (VAL4 == 1)) {
+            digitalWrite(LEDC, HIGH);
+        } else if ((VAL1 == 1) && (VAL2 == 1) && (VAL3 == 1) && (VAL4 == 1)) {
+            digitalWrite(LEDC, LOW);
         }
 
     }
@@ -268,7 +226,11 @@ void setup() {
     pinMode(BUZZ, OUTPUT);
     pinMode(trig, OUTPUT);
     pinMode(echo, INPUT);
+    pinMode(pinoR, OUTPUT);
+    pinMode(pinoG, OUTPUT);
+    pinMode(CHAVE, INPUT);
     pinMode(sensorPresenca, INPUT);
+    dht.begin();
 
     
   
@@ -285,6 +247,7 @@ void loop() {
     VAL2 = digitalRead(BIN2);
     VAL3 = digitalRead(BIN3);
     VAL4 = digitalRead(BIN4);
+    VAL5 = digitalRead(CHAVE);
 
     delay(500);
 
@@ -298,31 +261,22 @@ void loop() {
                 modoAtual = 1;
             }
         }
-        if (VAL1 == 0 && VAL2 == 0 && VAL3 == 1 && VAL4 == 1) {
-            Serial.println("Programação ativada");
-            isProgramActive = true;
-            modoAtual = 2;
+        if(VAL5 == 1) {
+          Serial.println("Binário Available");
+          if (VAL1 == 0 && VAL2 == 0 && VAL3 == 1 && VAL4 == 1) {
+              Serial.println("Programação ativada via binário");
+              isProgramActive = true;
+              modoAtual = 2;
+          }
         }
     }
 
     // Verifica o modo atual e executa a função correspondente
     if (modoAtual == 1) {
-        serialTeste(); // Checa comandos e executa continuamente
+        serialTeste(); 
     } else if (modoAtual == 2) {
+      //funcao if
         binarioTeste(); // Checa e executa com base nos valores binários
     }
 
-    // Executa medição de distância continuamente se ativado
-    if (medirDistancia) {
-        distancias();
-
-    }
-
-    // Executa detecção de movimento continuamente se ativado
-    if (detectarMov) {
-        detectarMovimento();
-    }
-    if (detecTemp) {
-      temperatura();
-    }
 }
