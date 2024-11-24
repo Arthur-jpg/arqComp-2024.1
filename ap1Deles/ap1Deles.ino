@@ -30,6 +30,7 @@ int pinoG = 10;
 #define trig 22
 #define echo 24
 #define CHAVE 12
+#define ENTER 9 // deinir porta que esteja livre
 
 #define sensorPresenca 8
 
@@ -179,7 +180,10 @@ void binarioTeste() {
 
     if (isProgramActive) {
         if((VAL1 == 0) && (VAL2 == 0) && (VAL3 == 0) && (VAL4 == 0)) {
+          Serial.println("Digite enter para continuar: ")
+          if(VAL6 == 1) {
             digitalWrite(LEDA, HIGH);
+          } 
         }
         else if ((VAL1 == 1) && (VAL2 == 0) && (VAL3 == 0) && (VAL4 == 0)) {
             digitalWrite(LEDA, LOW);
@@ -229,6 +233,7 @@ void setup() {
     pinMode(pinoR, OUTPUT);
     pinMode(pinoG, OUTPUT);
     pinMode(CHAVE, INPUT);
+    pinMode(ENTER, INPUT);
     pinMode(sensorPresenca, INPUT);
     dht.begin();
 
@@ -248,6 +253,7 @@ void loop() {
     VAL3 = digitalRead(BIN3);
     VAL4 = digitalRead(BIN4);
     VAL5 = digitalRead(CHAVE);
+    VAL6 = digitalRead(ENTER);
 
     delay(500);
 
